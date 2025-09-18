@@ -14,7 +14,6 @@ let g:polyglot_disabled = ['lua']
 
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-
 " }}}
 
 " ----------------------------------
@@ -30,12 +29,17 @@ Plugin 'gmarik/Vundle.vim' "Setup for Vundle
 Plugin 'dense-analysis/ale' "Linting and syntax checking - have to install linters
 Plugin 'sheerun/vim-polyglot' "Syntax highlighting
 Plugin 'uiiaoo/java-syntax.vim' "Syntax highlighting for java
-Plugin 'yegappan/lsp' "Language server
-Plugin 'girishji/vimcomplete' "Autocomplete
+Plugin 'shmup/vim-sql-syntax' "Syntax highlighting for SQL
+Plugin 'prabirshrestha/vim-lsp' "Language server
+Plugin 'prabirshrestha/asyncomplete.vim' "Autocomplete
+Plugin 'prabirshrestha/asyncomplete-lsp.vim' "Lsp integration
+Plugin 'prabirshrestha/asyncomplete-file.vim' "File path auto complete
 
 "Code Running
 Plugin 'jpalardy/vim-slime' "Allows for sending code to terminal
 Plugin 'jalvesaq/Nvim-R' "Literally a full R IDE
+Plugin 'tpope/vim-dadbod' "SQL IDE
+Plugin 'kristijanhusak/vim-dadbod-ui' "UI For vim dadbod
 
 "Git Integration
 Plugin 'tpope/vim-fugitive' "Git integration
@@ -43,7 +47,6 @@ Plugin 'airblade/vim-gitgutter' "Git status in the gutter
 
 "File Navigation
 Plugin 'Yggdroot/LeaderF' "Super powerful finder
-Plugin 'tpope/vim-vinegar' "Enhances netrw
 Plugin 'chriszarate/yazi.vim' "Vim integration for yazi
 
 "Quality of Life
@@ -58,7 +61,6 @@ Plugin 'romainl/vim-cool' "Automatically unhighlights after search
 Plugin 'wellle/context.vim' "Shows the current loop or funciton
 Plugin 'tpope/vim-commentary' "Allows for commenting with motions
 Plugin 'tpope/vim-unimpaired' "Adds some bracket mappings
-Plugin 'kristijanhusak/vim-carbon-now-sh' "Allows for sending code screenshots to carbon
 Plugin 'christoomey/vim-tmux-navigator' "Integration between Vim and Tmux 
 
 "Asthetic
@@ -73,6 +75,9 @@ Plugin 'machakann/vim-highlightedyank' "Highlight on yank
 Plugin 'psliwka/vim-smoothie' "Smooth scrolling
 
 "Not Currently In Use
+" Plugin 'kristijanhusak/vim-carbon-now-sh' "Allows for sending code screenshots to carbon
+" Plugin 'tpope/vim-vinegar' "Enhances netrw
+" Plugin 'cosminadrianpopescu/vim-sql-workbench'
 " Plugin 'vim-airline/vim-airline' "Status and buffer bar
 " Plugin 'justinmk/vim-sneak'  "Allows for jumping to two letter cominbations
 " Plugin 'Xuyuanp/nerdtree-git-plugin' "Shows git status in Nerdtree
@@ -81,6 +86,8 @@ Plugin 'psliwka/vim-smoothie' "Smooth scrolling
 " Plugin 'Xuyuanp/nerdtree-git-plugin' "Shows git status in Nerdtree
 " Plugin 'junegunn/vim-peekaboo' "Shows the current contents of your registers
 " Plugin 'ycm-core/YouCompleteMe' "Multi language auto complete - several install requirements
+" Plugin 'yegappan/lsp' "Language server
+" Plugin 'girishji/vimcomplete' "Autocomplete
 
 call vundle#end()
 filetype plugin indent on
@@ -286,51 +293,105 @@ highlight ALEError guibg=NONE guifg=NONE cterm=undercurl gui=undercurl guisp=RED
 let g:ale_linters_ignore = {'python': ['mypy', 'pylint']}
 
 "Vim LSP
-let lspOpts = #{aleSupport: v:true, showSignature: v:false, snippetSupport: v:true}
-autocmd User LspSetup call LspOptionsSet(lspOpts)
-nnoremap <silent><leader>ed :LspPeekDefinition<CR>
-nnoremap <silent><leader>gd :LspGotoDefinition<CR>
+if executable('vim-language-server')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'vimls',
+        \ 'cmd': {server_info->['vim-language-server', '--stdio']},
+        \ 'allowlist': ['vim'],
+        \ 'initialization_options': {
+        \   'vimruntime': $VIMRUNTIME,
+        \   'runtimepath': &rtp,
+        \   }
+        \ })
+endif
+
+if executable('r')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'r',
+        \ 'cmd': {server_info->['r --slave -e languageserver::run()']},
+        \ 'allowlist': ['r'],
+        \ })
+endif
+
+if executable('pyright')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pyright',
+        \ 'cmd': {server_info->['pyright-langserver', '--stdio', '--venv']},
+        \ 'allowlist': ['python'],
+        \ })
+endif
+
+if executable('jdtls')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'jdtls',
+        \ 'cmd': {server_info->['jdtls', '-data', getcwd()]},
+        \ 'allowlist': ['java'],
+        \ })
+endif
+
+if executable('bash-language-server')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'bashls',
+        \ 'cmd': {server_info->[&shell, &shellcmdflag, 'bash-language-server start']},
+        \ 'allowlist': ['sh'],
+        \ })
+endif
+
+if executable('sqls')
+    augroup LspSqls
+        autocmd!
+        autocmd User lsp_setup call lsp#register_server({
+        \   'name': 'sqls',
+        \   'cmd': {server_info->['sqls']},
+        \   'whitelist': ['sql'],
+        \ })
+    augroup END
+endif
+
+function! s:on_lsp_buffer_enabled() abort
+    setlocal omnifunc=lsp#complete
+    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+    let g:lsp_format_sync_timeout = 1000
+    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
+    
+    " refer to doc to add more commands
+endfunction
+
+augroup lsp_install
+    au!
+    " call s:on_lsp_buffer_enabled only for languages that has the server registered.
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+augroup END
+
+let g:lsp_diagnostics_enabled = 0
+nnoremap <silent><leader>gd :LspDefinition<CR>
+nnoremap <silent><leader>gs :LspDocumentSymbolSearch<CR>
+nnoremap <silent><leader>gS :LspWorkspaceSymbolSearch<CR>
+nnoremap <silent><leader>gi :LspImplementation<CR>
 nnoremap <silent><leader>rn :LspRename<CR>
 nnoremap <silent><leader>ho :LspHover<CR>
-nnoremap <silent><leader>oa :LspCodeAction<CR>
 
-let lspServers = ([
-                 \ #{name: 'vimls',
-                 \   filetype: 'vim',
-                 \   path: '/opt/homebrew/bin/vim-language-server',
-                 \   args: ['--stdio']
-                 \ }, 
-                 \ #{name: 'r',
-                 \   filetype: 'r',
-                 \   path: '/usr/local/bin/R',
-                 \   args: ['--slave', '-e', 'languageserver::run()']
-                 \   },
-                 \ #{name: 'pyright',
-                 \   filetype: 'python',
-                 \   path: '/opt/homebrew/bin/pyright-langserver',
-                 \   args: ['--stdio'],
-                 \   workspaceConfig: #{
-                 \    python: #{
-                 \       pythonPath:'/Users/tommy/opt/anaconda3/bin/python3'
-                 \    }}
-                 \  },
-                 \ #{name: 'jdtls',
-                 \   filetype: 'java',
-                 \   path: '/opt/homebrew/bin/jdtls',
-                 \   args: [],
-                 \ },
-                 \ #{name: 'bashls',
-                 \   filetype: 'sh',
-                 \   path: '/opt/homebrew/bin/bash-language-server',
-                 \   args: ['start']
-                 \}])
-autocmd User LspSetup call LspAddServer(lspServers)
+"Asyncomplete vim
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
+inoremap <expr> <cr> pumvisible() ? asyncomplete#close_popup() . "\<cr>" : "\<cr>"
 
-"Vimcomplete
-let g:vimcomplete_tab_enable = 1
-let vcoptions = #{noNewlineInCompletion: v:false, noNewlineInCompletionEver: v:false, vimcomplete-lsp-enable: v:true}
-autocmd VimEnter * call g:VimCompleteOptionsSet(vcoptions)
+au User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#file#get_source_options({
+    \ 'name': 'file',
+    \ 'allowlist': ['*'],
+    \ 'priority': 10,
+    \ 'completor': function('asyncomplete#sources#file#completor')
+    \ }))
 
+" allow modifying the completeopt variable, or it will
+" be overridden all the time
+" Sets up popup window
+let g:asyncomplete_auto_completeopt = 0
+
+set completeopt=menuone,noinsert,noselect,preview
+
+autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
 
 "Code Running
 " -------------------------
@@ -344,6 +405,11 @@ let g:slime_default_config = {"socket_name": "default", "target_pane": "{last}"}
 "Disable conflicting keybinds
 let R_assign = 0 
 let R_disable_cmds = ['RDSendLine']
+
+"Vim dadbod 
+autocmd FileType sql setlocal omnifunc=vim_dadbod_completion#omni
+autocmd FileType dbui setlocal omnifunc=vim_dadbod_completion#omni
+let g:db_ui_use_nerd_fonts = 1
 
 
 "Git Integration
@@ -396,12 +462,6 @@ endif
 
 "Asthetic
 " -------------------------
-"Airline
-" let g:airline_powerline_fonts = 1
-" let g:airline_theme = 'catppuccin_mocha'
-" let g:airline#extensions#tabline#enabled = 1
-" set fillchars+=stl:\ ,stlnc:\ 
-
 "Lightline
 set laststatus=2
 let g:lightline = {'colorscheme': 'catppuccin_mocha'}
@@ -463,5 +523,65 @@ let g:togglecursor_force = 'xterm'
 "     call webdevicons#refresh()
 " endif
 
+"Airline
+" let g:airline_powerline_fonts = 1
+" let g:airline_theme = 'catppuccin_mocha'
+" let g:airline#extensions#tabline#enabled = 1
+" set fillchars+=stl:\ ,stlnc:\ 
+
+"Vim9 LSP
+" let lspOpts = #{aleSupport: v:true, showSignature: v:false, snippetSupport: v:true, completionMatcher: 'fuzzy'}
+" autocmd User LspSetup call LspOptionsSet(lspOpts)
+" nnoremap <silent><leader>ed :LspPeekDefinition<CR>
+" nnoremap <silent><leader>gd :LspGotoDefinition<CR>
+" nnoremap <silent><leader>rn :LspRename<CR>
+" nnoremap <silent><leader>ho :LspHover<CR>
+" nnoremap <silent><leader>oa :LspCodeAction<CR>
+
+" let lspServers = ([
+"                  \ #{name: 'vimls',
+"                  \   filetype: 'vim',
+"                  \   path: '/opt/homebrew/bin/vim-language-server',
+"                  \   args: ['--stdio']
+"                  \ }, 
+"                  \ #{name: 'r',
+"                  \   filetype: 'r',
+"                  \   path: '/usr/local/bin/R',
+"                  \   args: ['--slave', '-e', 'languageserver::run()']
+"                  \   },
+"                  \ #{name: 'pyright',
+"                  \   filetype: 'python',
+"                  \   path: '/opt/homebrew/bin/pyright-langserver',
+"                  \   args: ['--stdio'],
+"                  \   workspaceConfig: #{
+"                  \    python: #{
+"                  \       pythonPath:'/Users/thager/.virtualenvs/Work/bin/python'
+"                  \    }}
+"                  \  },
+"                  \ #{name: 'jdtls',
+"                  \   filetype: 'java',
+"                  \   path: '/opt/homebrew/bin/jdtls',
+"                  \   args: [],
+"                  \ },
+"                  \ #{name: 'sql-language-server',
+"                  \  filetype: ['sql', 'dbui'],
+"                  \  path: '/opt/homebrew/bin/sql-language-server',
+"                  \  args: ['up', '--method', 'stdio'],
+"                  \ },
+"                  \ #{name: 'bashls',
+"                  \   filetype: 'sh',
+"                  \   path: '/opt/homebrew/bin/bash-language-server',
+"                  \   args: ['start']
+"                  \}])
+" autocmd User LspSetup call LspAddServer(lspServers)
+
+"Vimcomplete
+" let g:vimcomplete_tab_enable = 1
+" let vcoptions = #{noNewlineInCompletion: v:false, noNewlineInCompletionEver: v:false, vimcomplete-lsp-enable: v:true}
+" autocmd VimEnter * call g:VimCompleteOptionsSet(vcoptions)
+
+"Sql Workbench
+" let g:sw_config_dir = '/Users/thager/.sqlworkbench'
+" let g:sw_exe = '/Library/Workbench-Build132-with-optional-libs/customStartScript.sh'
 
 " }}}

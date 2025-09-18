@@ -187,11 +187,11 @@ _fzf_comprun(){
 }
 
 alias fzp="fzf --preview '$show_file_or_dir_preview'"
-export BAT_THEME="Catppuccin Frappe"
+export BAT_THEME="Catppuccin Mocha"
 alias cd="z"
 alias ls="eza --color=always --icons=always"
 alias cat="bat"
-export EDITOR=vim
+export EDITOR=nvim
 HISTSIZE=5000
 HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
@@ -205,3 +205,5 @@ setopt hist_ignore_dups
 setopt hist_find_no_dups
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
