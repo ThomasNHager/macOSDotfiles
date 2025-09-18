@@ -34,6 +34,8 @@ vim.opt.colorcolumn = "80"
 
 vim.opt.updatetime = 50
 
+vim.g.have_nerd_font = true
+
 -- Netew winsize
 -- @default = 20
 vim.g.netrw_winsize = 15
