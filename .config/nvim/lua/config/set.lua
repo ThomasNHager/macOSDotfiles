@@ -1,39 +1,50 @@
+-- Line numbers and relative line numbers
 vim.opt.nu = true
 vim.opt.relativenumber = true
 
+-- Set indent to 4 spaces
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
-
 vim.opt.smartindent = true
 
+-- Set backup and undo dir
 vim.opt.backupdir = os.getenv("HOME") .. "/tmp/"
 vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 vim.opt.undofile = true
 
+-- Improve default search
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
+-- Good coloring
 vim.opt.termguicolors = true
 
+-- Split to the right and below
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 
+-- If the line goes over the screen wrap it
 vim.opt.linebreak = true
 vim.opt.breakindent = true
 vim.opt.showbreak = ">>"
 
+-- Keep 6 lines below at least
 vim.opt.scrolloff = 6
 
+-- Leader key
 vim.g.mapleader = " "
 
+-- Colorcolumn at 80
 vim.opt.colorcolumn = "80"
 
+-- Update faster
 vim.opt.updatetime = 50
 
+-- Use nerd fonts
 vim.g.have_nerd_font = true
 
 -- Netew winsize
@@ -84,3 +95,7 @@ vim.g.netrw_preview = 1
 
 -- Highlight marked files in the same way search matches are
 vim.cmd("hi! link netrwMarkFile Search")
+
+-- Highlight the active line
+vim.opt.cursorline = true
+vim.opt.cursorlineopt = "number"
