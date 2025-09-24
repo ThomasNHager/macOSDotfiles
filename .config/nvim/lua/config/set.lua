@@ -28,6 +28,7 @@ vim.opt.splitbelow = true
 vim.opt.splitright = true
 
 -- If the line goes over the screen wrap it
+vim.opt.set.wrap = true
 vim.opt.linebreak = true
 vim.opt.breakindent = true
 vim.opt.showbreak = ">>"
