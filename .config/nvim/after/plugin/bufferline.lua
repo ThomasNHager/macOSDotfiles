@@ -1,0 +1,24 @@
+-- local mocha = require("catppuccin.palettes").get_palette "mocha"
+-- require("bufferline").setup {
+--     options = {
+--         diagnostics = "nvim_lsp",
+--         middle_mouse_command = "bdelete! %d",
+--         right_mouse_command = nil,
+--         numbers = "ordinal",
+--         separator_style = "slant",
+--     },
+--     highlights = require("catppuccin.special.bufferline").get_theme {
+--         styles = { "italic", "bold" },
+--         custom = {
+--             all = {
+--                 fill = { bg = "#000000" },
+--             },
+--             mocha = {
+--                 background = { fg = mocha.text },
+--             },
+--             latte = {
+--                 background = { fg = "#000000" },
+--             },
+--         },
+--     },
+-- }
