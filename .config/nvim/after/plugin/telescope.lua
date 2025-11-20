@@ -1,11 +1,8 @@
 require('telescope').setup{
   defaults = {
-    layout_strategy = 'vertical',
+    layout_strategy = 'flex',
     layout_config = {
-      prompt_position = 'bottom',
-      -- Optional: Adjust height/width as needed
-      -- height = 0.8,
-      -- width = 0.8
+        flip_columns = 160
     },
   },
 }
