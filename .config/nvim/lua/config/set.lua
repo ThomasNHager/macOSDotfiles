@@ -91,8 +91,9 @@ vim.g.netrw_preview = 1
 -- 4 : act like "P" (ie. open previous window)
 vim.g.netrw_browse_split = 0
 
--- Split on the left
+-- Set netrw to open previews to the right of the tree
 vim.g.netrw_preview = 1
+vim.g.netrw_alto = 0
 
 -- Highlight marked files in the same way search matches are
 vim.cmd("hi! link netrwMarkFile Search")
@@ -100,3 +101,11 @@ vim.cmd("hi! link netrwMarkFile Search")
 -- Highlight the active line
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
+
+-- Fold text based on treesitter
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldtext = ""
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 1
+vim.opt.foldnestmax = 4
