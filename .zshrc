@@ -207,3 +207,4 @@ bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+export PATH="/Users/thager/.local/bin:$PATH"
