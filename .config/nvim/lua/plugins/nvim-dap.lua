@@ -11,7 +11,34 @@ return {
       local dapui = require("dapui")
       local dap_python = require("dap-python")
 
-      require("dapui").setup({})
+      require("dapui").setup({
+          layouts = {
+              {
+                  elements = {
+                      'scopes',
+                      'breakpoints',
+                      'stacks',
+                      'watches',
+                  },
+                  size = 65,
+                  position = 'left',
+              },
+              {
+                  elements = {
+                      'console',
+                  },
+                  size = 90,
+                  position = 'right'
+              },
+              {
+                  elements = {
+                      'repl',
+                  },
+                  size = 17,
+                  position = 'bottom',
+              },
+          },
+      })
 
       dap_python.setup("python3")
 
@@ -44,9 +71,14 @@ return {
       local opts = { noremap = true, silent = true }
 
       -- Toggle breakpoint
-      vim.keymap.set("n", "<leader>br", function()
+      vim.keymap.set("n", "<leader>Br", function()
         dap.toggle_breakpoint()
       end, opts)
+
+      -- Conditional breakpoint
+      vim.keymap.set("n", "<leader>BB", function()
+        dap.set_breakpoint(vim.fn.input('Breakpoint condition: '))
+      end, {desc = 'Conditional breakpoint'})
 
       -- Continue / Start
       vim.keymap.set("n", "<leader>dc", function()
