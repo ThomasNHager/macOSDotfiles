@@ -208,3 +208,6 @@ bindkey '^n' history-search-forward
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 export PATH="/Users/thager/.local/bin:$PATH"
+
+# added by Snowflake SnowflakeCLI installer v1.0
+export PATH=/Applications/SnowflakeCLI.app/Contents/MacOS/:$PATH
