@@ -12,6 +12,7 @@ return{
             integrations = {
                 bufferline = true,
                 cmp = true,
+                lualine = true,
             },
         }
     }

@@ -2,6 +2,14 @@
 local cmp = require'cmp'
 
 cmp.setup({
+    -- formatting = {
+    --     format = function(entry, vim_item)
+    --         if entry.source.name == 'dbridge' then
+    --             return rquire('dbridge.cmp_format').build_format(entry, vim_item)
+    --         end
+    --         return vim_item
+    --     end,
+    -- },
 	mapping = cmp.mapping.preset.insert({
 		['<C-b>'] = cmp.mapping.scroll_docs(-4),
 		['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -30,6 +38,12 @@ cmp.setup({
         { name = 'cmp-dbee' },
 	})
 })
+
+-- cmp.setup.filetype({ 'sql' }, {
+--     sources = {
+--         { name = 'dbridge' },
+--     },
+-- })
 
 -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline({ '/', '?' }, {

@@ -23,6 +23,11 @@ return {
                         type = "snowflake",
                         url = "snowflake://thager@RATEGENIUS.us-east-1.snowflakecomputing.com/TSG_SF_DATA?authenticator=snowflake_jwt&privateKeyPath=/Users/thager/.ssh/rsa_key.p8",
                     },
+                    {
+                        name = "Test",
+                        type = "snowflake",
+                        url = "snowflake://thager@RATEGENIUS.us-east-1.snowflakecomputing.com?authenticator=snowflake_jwt&privateKeyPath=/Users/thager/.ssh/rsa_key.p8",
+                    },
                 }),
                 require("dbee.sources").EnvSource:new("DBEE_CONNECTIONS"),
                 require("dbee.sources").FileSource:new(vim.fn.stdpath("cache") .. "/dbee/persistence.json"),
