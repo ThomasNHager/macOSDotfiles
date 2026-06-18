@@ -4,5 +4,8 @@ return
     main = "ibl",
     ---@module "ibl"
     ---@type ibl.config
+    cond = function()
+        return not vim.g.vscode
+    end,
     opts = {},
 }

@@ -1,3 +1,6 @@
+if vim.g.vscode then
+    return
+end
 -- Set up nvim-cmp.
 local cmp = require'cmp'
 

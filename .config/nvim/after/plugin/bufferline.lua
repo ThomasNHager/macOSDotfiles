@@ -1,3 +1,6 @@
+if vim.g.vscode then
+    return
+end
 local mocha = require("catppuccin.palettes").get_palette "mocha"
 require("bufferline").setup {
     highlights = require("catppuccin.special.bufferline").get_theme {
